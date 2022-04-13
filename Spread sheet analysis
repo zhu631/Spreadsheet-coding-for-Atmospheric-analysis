@@ -1,0 +1,105 @@
+@author: zhu631
+"""
+import matplotlib.pyplot as plt
+import pylab
+import numpy as np
+from scipy import stats
+import pandas as pd
+
+#df5 = pd.read_csv('T1.csv', skiprows=[0],
+ #                header=None, dtype = np.float32)   
+
+df4 = pd.read_csv('rmse_all.csv', skiprows=[0],
+                 header=None, dtype = np.float32)
+
+df5 = pd.read_csv('T_all.csv', skiprows=[0],
+                 header=None, dtype = np.float32)
+    
+df6 = pd.DataFrame(index = list(range(1,1000)),columns=["2","3","4","5","6","7","8","9","10"])
+#range
+#df7 = pd.DataFrame(index = list(range(1,200)),columns=["2","3","4","5","6","7","8","9"])
+#max
+#df8 = pd.DataFrame(index = list(range(1,200)),columns=["2","3","4","5","6","7","8","9"])
+# difference std
+#df9 = pd.DataFrame(index = list(range(1,200)),columns=["2","3","4","5","6","7","8","9"])
+
+std_all = []
+range_all =[]
+max_all = []
+diffstd_all = []
+rmse_all = []
+numtarget_all = []
+mean_all = []
+median_all = []
+min_all = []
+for i in range(8):
+    #rmse = df4[i]
+    #rmse_all.append(rmse)
+    num = np.count_nonzero(~np.isnan(df5[i]))
+    num_set = int(num/(i+2))
+    for k in range (num_set):
+        
+        rmse = df4[i][k]
+        rmse_all.append(rmse)
+        std = df5[i][(i+2)*k:(i+2)*(k+1)].std()
+        std_all.append(std)
+        rangee = df5[i][(i+2)*k:(i+2)*(k+1)].max() - df5[i][(i+2)*k:(i+2)*(k+1)].min()
+        range_all.append(rangee)
+        max = df5[i][(i+2)*k:(i+2)*(k+1)].max()
+        max_all.append(max)
+        diffstd = df5[i][(i+2)*k:(i+2)*(k+1)].sort_values().diff(periods=1).dropna().std()
+        diffstd_all.append(diffstd)
+        numtarget = (i+2)
+        numtarget_all.append(numtarget)
+        mean = df5[i][(i+2)*k:(i+2)*(k+1)].mean()
+        mean_all.append(mean)
+        median = df5[i][(i+2)*k:(i+2)*(k+1)].median()
+        median_all.append(median)
+        min = df5[i][(i+2)*k:(i+2)*(k+1)].min()
+        min_all.append(min)
+        
+        
+        
+this_column0 = df6.columns[0]
+this_column1 = df6.columns[1]
+this_column2 = df6.columns[2]
+this_column3 = df6.columns[3]
+this_column4 = df6.columns[4]
+this_column5 = df6.columns[5]
+this_column6 = df6.columns[6]
+this_column7 = df6.columns[7]
+this_column8 = df6.columns[8]
+
+df6[this_column0] = pd.Series(rmse_all, index = df6.index[:len(rmse_all)])   
+df6[this_column1] = pd.Series(std_all, index = df6.index[:len(std_all)])   
+df6[this_column2] = pd.Series(range_all, index = df6.index[:len(range_all)])
+df6[this_column3] = pd.Series(max_all, index = df6.index[:len(max_all)])
+df6[this_column4] = pd.Series(diffstd_all, index = df6.index[:len(diffstd_all)])
+df6[this_column5] = pd.Series(numtarget_all, index = df6.index[:len(numtarget_all)])
+df6[this_column6] = pd.Series(mean_all, index = df6.index[:len(mean_all)])
+df6[this_column7] = pd.Series(median_all, index = df6.index[:len(median_all)])
+df6[this_column8] = pd.Series(min_all, index = df6.index[:len(min_all)])
+
+    
+"""    
+    std_all=[]
+    range_all=[]
+    max_all=[]
+    diffstd_all=[]"""
+    
+
+df6.to_csv('factors_nf_mean2.csv',index=False)
+#df7.to_csv('range_nf.csv',index=False)
+#df8.to_csv('max_nf.csv',index=False)
+#df9.to_csv('diffstd_nf.csv',index=False)
+
+"""
+df7 = pd.read_csv('std.csv', skiprows=[0],
+                 header=None, dtype = np.float32)  
+
+plt.scatter(df7[0].dropna(), df4[0].dropna())
+plt.xlabel('Temperature Standard Deviation($^\circ$C)')
+plt.ylabel('RMSE($^\circ$C)/($^\circ$C)')
+plt.title('Two Targets')
+plt.ylim(0, 15)
+plt.xlim(0, 20)"""
