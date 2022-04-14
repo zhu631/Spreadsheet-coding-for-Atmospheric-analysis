@@ -1,0 +1,105 @@
+@author: zhu631
+"""
+
+import matplotlib.pyplot as plt
+import pylab
+import numpy as np
+from scipy import stats
+import pandas as pd
+from itertools import combinations 
+df = pd.read_csv('70m_T1.csv', skiprows=[0],
+                 header=None, dtype = np.float32, usecols = [0,1,2,3])
+
+df1 = pd.read_csv('M2_70M.csv', skiprows=[0],
+                 header=None, dtype = np.float32)
+detected =[]
+emitted = []
+slope_all = []
+r_value_all = []
+intercept_all = []
+uncertainty_all = []
+diff_all = []
+rmse_all = []
+T = []
+df2 = pd.DataFrame(index = list(range(1,150)),columns=["2","3","4","5","6","7","8","9"])
+df3 = pd.DataFrame(index = list(range(1,800)),columns=["2","3","4","5","6","7","8","9"])
+#df3 = pd.DataFrame(columns=["2","3","4","5","6","7","8","9"])
+#df2 = pd.DataFrame({'Comb':range(100)})
+
+
+for k in range(2,10):
+    this_column1 = df2.columns[k-2]
+    this_column2 = df3.columns[k-2]
+    comb = combinations(df[0],k)
+    for i in list(comb):
+        for m in range(k):
+            detected.append(df[3][i[m]])
+            emitted.append(df[2][i[m]])
+            
+        slope, intercept, r_value, p_value, std_err = stats.linregress(detected,emitted)
+        if slope >0:
+            slope_all.append(slope)
+            intercept_all.append(intercept)
+            r_value_all.append(r_value)
+            
+            print (i)
+
+            for w in range(7):
+#        if slope >0:
+                radiance_c = (slope*df1[3*w]+intercept)/df1[3*w+1][0]
+                T_c = -0.007*radiance_c**2+1.9401*radiance_c+216.4-273.15
+                diff = (T_c.mean()-df1[3*w+2][0])**2
+                diff_all.append(diff)
+        
+        if diff_all != []:
+            rmse = (np.array(diff_all).sum()/7)**0.5
+        
+            #if rmse <1:
+            
+            rmse_all.append(rmse)
+            for m in range(k):
+                T.append(df[1][i[m]])
+            
+        detected = []
+        emitted = []
+        diff_all = []
+        
+    df2[this_column1] = pd.Series(rmse_all, index = df2.index[:len(rmse_all)])
+    #df3[this_column2] = [T]
+    df3[this_column2] = pd.Series(T, index = df3.index[:len(T)])
+    rmse_all = []
+    T = []
+
+df2.to_csv('rmse_all.csv',index=False)
+df3.to_csv('T_all.csv',index=False)   
+    
+df4 = pd.read_csv('rmse_all.csv', skiprows=[0],
+                 header=None, dtype = np.float32)
+
+df5 = pd.read_csv('T_all.csv', skiprows=[0],
+                 header=None, dtype = np.float32)    
+    
+"""out = open('out3.csv', 'w')
+for i in rmse_all:
+    
+    out.write('%f' % i)
+    out.write('\n')
+out.close()   
+"""    
+"""x = list(range(1, (len(slope_all)+1)))
+    
+plt.scatter(x,rmse_all)
+plt.xlabel("Combination")
+plt.ylabel("RMSE")  
+plt.show()    
+fig = plt.figure()
+#fig.suptitle('bold figure suptitle', fontsize=14, fontweight='bold')
+
+ax = fig.add_subplot(111)
+ax.boxplot(rmse_all,patch_artist=True,whis=10)
+
+#ax.set_title('axes title')
+ax.set_xlabel('2')
+ax.set_ylabel('RMSE ($^\circ$C)')
+
+plt.show()  """
