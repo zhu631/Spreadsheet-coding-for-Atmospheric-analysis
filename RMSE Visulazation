@@ -1,0 +1,22 @@
+@author: zhu631
+"""
+
+import pandas as pd
+from matplotlib import pyplot as plt
+import seaborn as sns
+import numpy as np
+
+#mybox.set_facecolor('white')
+df = pd.read_csv('RMSE_30_one.csv')
+ax = sns.boxplot(data=df,whis = 10)
+ax = sns.swarmplot(x="Date", y="RMSE",data=df, hue="Rules",)
+#ax = sns.boxplot(data=df,whis = 10).set(ylabel='RMSE($^\circ$C)',xlabel='Date')
+#plt.ylim(0, 10)
+#plt.yticks(np.arange(0, 10, 1.0))
+ax.set(ylabel='RMSE ($^\circ$C)')
+mybox = ax.artists[0]
+mybox.set_facecolor('white')
+figure = ax.get_figure()
+plt.legend(bbox_to_anchor=(0.52, 0.9), loc='upper left', borderaxespad=0)
+
+figure.savefig('box_plot.png', dpi=400)
